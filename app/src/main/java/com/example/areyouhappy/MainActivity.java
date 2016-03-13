@@ -1,10 +1,13 @@
 package com.example.areyouhappy;
 
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
+import android.net.Uri;
 import android.os.Environment;
+import android.provider.MediaStore;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -42,6 +45,9 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
     private static String mFileName = null;
     ImageView star;
     ImageView dogee;
+    private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
+    private Uri fileUri;
+
     private Button mRecordButton = null;
     private MediaRecorder mRecorder = null;
 
@@ -79,6 +85,8 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
         star.setMinimumHeight(starDrawable.getBitmap().getWidth());
 
 
+
+
         rotate = AnimationUtils.loadAnimation(MainActivity.this, R.anim.rotate);
 
         mRecordButton.setOnClickListener(new View.OnClickListener() {
@@ -98,6 +106,7 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
             public void onClick(View v) {
                 star.startAnimation(rotate);
                 useHODClient();
+
             }
         });
     }
@@ -147,10 +156,18 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
                 double agg = resp.aggregate.score;
                     if (agg >= 0.0) {
                         isHappy = true;
-                    } else if (agg < 0.0){
+                    } else if (agg < 0.0) {
                         isHappy = false;
                     }
                 Log.d(LOG_TAG, "requestCompletedWithContent: "+isHappy);
+
+                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+
+//        fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE); // create a file to save the image
+                intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
+
+                // start the image capture Intent
+                startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
             }
         }
     }
@@ -226,5 +243,7 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
         mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
         mFileName += "/audiorecord.mp4";
     }
+
+
 
 }

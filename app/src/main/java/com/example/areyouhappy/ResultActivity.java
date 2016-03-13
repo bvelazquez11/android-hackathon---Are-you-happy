@@ -2,6 +2,7 @@ package com.example.areyouhappy;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
@@ -11,7 +12,7 @@ public class ResultActivity extends AppCompatActivity {
     ImageView selfieView;
     ImageView aura;
     ImageView characterView;
-    boolean isHappy = true;
+    boolean isHappy = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -26,15 +27,18 @@ public class ResultActivity extends AppCompatActivity {
         characterView.setMaxWidth(halfWidth);
         characterView.setMinimumWidth(halfWidth);
 
-        Picasso.with(this)
-                .load(R.drawable.dummie_selfie)
-                .into(selfieView);
 
         if (isHappy) {
+            Picasso.with(this)
+                    .load(R.drawable.happy_selfie)
+                    .into(selfieView);
             Picasso.with(this)
                     .load(R.drawable.cornersun)
                     .into(characterView);
         } else if (!isHappy){
+            Picasso.with(this)
+                    .load(R.drawable.sad_selfie)
+                    .into(selfieView);
             aura.setImageResource(R.drawable.sad_gradient);
             Picasso.with(this)
                     .load(R.drawable.cornercloud)
