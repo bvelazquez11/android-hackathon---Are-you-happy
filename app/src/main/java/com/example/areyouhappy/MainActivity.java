@@ -28,6 +28,7 @@ import com.squareup.picasso.Picasso;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -61,11 +62,11 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
 
     int counter = 1;
     int async_counter = 0;
+    int rounded;
 
     private MediaPlayer mPlayer = null;
 
     Animation rotate;
-    Button mHODbutton;
     TextView mTextView;
 
     boolean mStartPlaying = true;
@@ -79,7 +80,6 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
         setContentView(R.layout.activity_main);
 
         mRecordButton = (Button) findViewById(R.id.RecordButton);
-        mHODbutton = (Button) findViewById(R.id.HODbutton);
         mTextView = (TextView) findViewById(R.id.textView);
         star = (ImageView) findViewById(R.id.star);
         dogee = (ImageView) findViewById(R.id.dogee);
@@ -140,12 +140,6 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
 
             }
         });
-        mHODbutton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                useHODClient();
-            }
-        });
     }
 
     @Override
@@ -163,6 +157,7 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
             Intent intent = new Intent(MainActivity.this,ResultActivity.class);
             intent.putExtra("ishappy",isHappy);
             intent.putExtra("byteArray", byteArray);
+            intent.putExtra("percent",rounded);
             startActivity(intent);
         }
     }
@@ -211,25 +206,8 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
                             params.put("text", textArray);
                             hodClient.GetRequest(params, hodApp, HODClient.REQ_MODE.SYNC);
                         }
-                        //hodClient.GetRequest(params, hodApp, HODClient.REQ_MODE.SYNC);
                     }
-/*
-mRecordButton.setEnabled(true);
-                    recognizedText = doc.content;
 
-                    Runnable runnable = new Runnable() {
-                        @Override
-                        public void run() {
-                            hodApp = HODApps.ANALYZE_SENTIMENT;
-                            Map<String, Object> params = new HashMap<>();
-                            params.put("text", recognizedText);
-                            hodClient.GetRequest(params, hodApp, HODClient.REQ_MODE.SYNC);
-                        }
-                    };
-                    Handler delay = new Handler();
-                    delay.postDelayed(runnable, 500);
-*/
-                    //hodClient.GetRequest(params, hodApp, HODClient.REQ_MODE.SYNC);
                 }
             }
         }
@@ -246,6 +224,10 @@ mRecordButton.setEnabled(true);
                     } else if (agg < 0.0) {
                         isHappy = false;
                     }
+
+                    double percent = Math.abs(agg) * 100;
+                    rounded = (int) Math.round(percent);
+
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
                 }

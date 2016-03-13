@@ -25,4 +25,12 @@
         android:layout_marginTop="-125dp"
         android:layout_gravity="top|left"/>
 
+    <TextView
+        android:id="@+id/percentView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textStyle="bold"
+        android:layout_gravity="right"
+        android:textSize="35sp"/>
+
 </FrameLayout>
