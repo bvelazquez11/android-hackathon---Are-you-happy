@@ -1,6 +1,7 @@
 package com.example.areyouhappy;
 
 import android.content.Context;
+import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.os.Environment;
@@ -9,9 +10,14 @@ import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.Button;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -34,13 +40,14 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
     HODResponseParser hodResponseParser = new HODResponseParser();
     private static final String LOG_TAG = "AudioRecordTest";
     private static String mFileName = null;
-
+    ImageView star;
+    ImageView dogee;
     private Button mRecordButton = null;
     private MediaRecorder mRecorder = null;
 
-    private Button   mPlayButton;
     private MediaPlayer mPlayer = null;
 
+    Animation rotate;
     Button mHODbutton;
     TextView mTextView;
 
@@ -54,9 +61,25 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
         setContentView(R.layout.activity_main);
 
         mRecordButton = (Button) findViewById(R.id.RecordButton);
-        mPlayButton = (Button) findViewById(R.id.PlayButton);
         mHODbutton = (Button) findViewById(R.id.HODbutton);
         mTextView = (TextView) findViewById(R.id.textView);
+        star = (ImageView) findViewById(R.id.star);
+        dogee = (ImageView) findViewById(R.id.dogee);
+        BitmapDrawable starDrawable = (BitmapDrawable) this.getResources().getDrawable(R.drawable.star);
+
+        Picasso.with(this)
+                .load(R.drawable.star)
+                .into(star);
+
+        Picasso.with(this)
+                .load(R.drawable.dogee)
+                .into(dogee);
+
+        star.setMinimumWidth(starDrawable.getBitmap().getWidth());
+        star.setMinimumHeight(starDrawable.getBitmap().getWidth());
+
+
+        rotate = AnimationUtils.loadAnimation(MainActivity.this, R.anim.rotate);
 
         mRecordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
@@ -70,23 +93,10 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
             }
         });
 
-
-        mPlayButton.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (mStartPlaying) {
-                    mPlayButton.setText("Stop playing");
-                } else {
-                    mPlayButton.setText("Start playing");
-                }
-
-                onPlay(mStartPlaying);
-                mStartPlaying = !mStartPlaying;
-            }
-        });
-
         mHODbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                star.startAnimation(rotate);
                 useHODClient();
             }
         });
