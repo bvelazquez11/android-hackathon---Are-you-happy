@@ -38,14 +38,10 @@ public class ResultActivity extends AppCompatActivity {
         selfieView.setImageBitmap(selfie);
         if (isHappy) {
             auraView.setBackgroundResource(R.drawable.happy_gradient);
-            Picasso.with(this)
-                    .load(R.drawable.cornersun)
-                    .into(characterView);
+            characterView.setImageResource(R.drawable.cornersun);
         } else if (!isHappy){
             auraView.setBackgroundResource(R.drawable.sad_gradient);
-            Picasso.with(this)
-                    .load(R.drawable.cornercloud)
-                    .into(characterView);
+            characterView.setImageResource(R.drawable.cornercloud);
         }
     }
 }
