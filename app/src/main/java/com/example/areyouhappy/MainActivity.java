@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
     boolean mStartRecording = false;
     String hodApp = "";
     boolean isHappy;
-    int maxQuestion = 2;
+    int maxQuestion = 5;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -122,19 +122,19 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
 
                 switch (counter) {
                     case 2 :
-                        mTextView.setText("How was your past week?");
+                        mTextView.setText("If your past week were a season like summer or winter, what would it be and why?");
                         break;
                     case 3 :
-                        mTextView.setText("Done!");
+                        mTextView.setText("Are you lucky? Why or why not?");
                         break;
                     case 4 :
-                        mTextView.setText("question 4");
+                        mTextView.setText("What would other people say about you?");
                         break;
                     case 5 :
-                        mTextView.setText("question 5");
+                        mTextView.setText("What do you think about when you are alone?");
                         break;
                     case 6 :
-                        mTextView.setText("done!");
+                        mTextView.setText("Done!");
                         break;
                 }
 
