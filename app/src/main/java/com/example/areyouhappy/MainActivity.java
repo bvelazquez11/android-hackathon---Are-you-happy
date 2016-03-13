@@ -2,6 +2,7 @@ package com.example.areyouhappy;
 
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.drawable.BitmapDrawable;
 import android.media.MediaPlayer;
 import android.media.MediaRecorder;
@@ -22,6 +23,8 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -47,6 +50,8 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
     ImageView dogee;
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
     private Uri fileUri;
+    private static final int TAKE_PICTURE = 1;
+    private Uri imageUri;
 
     private Button mRecordButton = null;
     private MediaRecorder mRecorder = null;
@@ -112,6 +117,25 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
     }
 
     @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (requestCode == CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE){
+            Bundle bundle = data.getExtras();
+            Bitmap bitmap = (Bitmap) bundle.get("data");
+
+            ByteArrayOutputStream stream = new ByteArrayOutputStream();
+            bitmap.compress(Bitmap.CompressFormat.PNG, 100, stream);
+            byte[] byteArray = stream.toByteArray();
+
+
+            Intent intent = new Intent(MainActivity.this,ResultActivity.class);
+            intent.putExtra("ishappy",isHappy);
+            intent.putExtra("byteArray",byteArray);
+            startActivity(intent);
+        }
+    }
+
+    @Override
     public void onPause() {
         super.onPause();
         if (mRecorder != null) {
@@ -162,10 +186,8 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
                 Log.d(LOG_TAG, "requestCompletedWithContent: "+isHappy);
 
                 Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-
 //        fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE); // create a file to save the image
-                intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
-
+//                intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
                 // start the image capture Intent
                 startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
             }
@@ -244,6 +266,13 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
         mFileName += "/audiorecord.mp4";
     }
 
-
+    public void takePhoto(View view) {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        File photo = new File(Environment.getExternalStorageDirectory(),  "Pic.jpg");
+        intent.putExtra(MediaStore.EXTRA_OUTPUT,
+                Uri.fromFile(photo));
+        imageUri = Uri.fromFile(photo);
+        startActivityForResult(intent, TAKE_PICTURE);
+    }
 
 }

@@ -1,8 +1,10 @@
 package com.example.areyouhappy;
 
+import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
-import android.view.View;
 import android.widget.ImageView;
 
 import com.squareup.picasso.Picasso;
@@ -10,36 +12,38 @@ import com.squareup.picasso.Picasso;
 public class ResultActivity extends AppCompatActivity {
 
     ImageView selfieView;
-    ImageView aura;
+    ImageView auraView;
     ImageView characterView;
-    boolean isHappy = false;
+    boolean isHappy;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_result);
         selfieView = (ImageView) findViewById(R.id.selfieView);
-        aura = (ImageView) findViewById(R.id.aura);
+        auraView = (ImageView) findViewById(R.id.aura);
         characterView = (ImageView) findViewById(R.id.characterView);
 
-        int width = aura.getWidth();
+        Intent recievedIntent = getIntent();
+        isHappy = false;
+//        isHappy = recievedIntent.getBooleanExtra("ishappy", true);
+        byte[] byteArray = recievedIntent.getByteArrayExtra("byteArray");
+        Bitmap selfie = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
+
+        int width = auraView.getWidth();
         int halfWidth = width/2;
         characterView.setMaxWidth(halfWidth);
         characterView.setMinimumWidth(halfWidth);
 
 
+        selfieView.setImageBitmap(selfie);
         if (isHappy) {
-            Picasso.with(this)
-                    .load(R.drawable.happy_selfie)
-                    .into(selfieView);
+            auraView.setBackgroundResource(R.drawable.happy_gradient);
             Picasso.with(this)
                     .load(R.drawable.cornersun)
                     .into(characterView);
         } else if (!isHappy){
-            Picasso.with(this)
-                    .load(R.drawable.sad_selfie)
-                    .into(selfieView);
-            aura.setImageResource(R.drawable.sad_gradient);
+            auraView.setBackgroundResource(R.drawable.sad_gradient);
             Picasso.with(this)
                     .load(R.drawable.cornercloud)
                     .into(characterView);
