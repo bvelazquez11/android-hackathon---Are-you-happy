@@ -8,7 +8,9 @@ import android.media.MediaPlayer;
 import android.media.MediaRecorder;
 import android.net.Uri;
 import android.os.Environment;
+import android.os.Handler;
 import android.provider.MediaStore;
+import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
@@ -27,10 +29,14 @@ import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Map;
 import java.util.Observer;
+
 
 import hod.api.hodclient.HODApps;
 import hod.api.hodclient.HODClient;
@@ -49,12 +55,12 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
     ImageView star;
     ImageView dogee;
     private static final int CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE = 100;
-    private Uri fileUri;
-    private static final int TAKE_PICTURE = 1;
-    private Uri imageUri;
 
     private Button mRecordButton = null;
     private MediaRecorder mRecorder = null;
+
+    int counter = 1;
+    int async_counter = 0;
 
     private MediaPlayer mPlayer = null;
 
@@ -63,9 +69,10 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
     TextView mTextView;
 
     boolean mStartPlaying = true;
-    boolean mStartRecording = true;
+    boolean mStartRecording = false;
     String hodApp = "";
     boolean isHappy;
+    int maxQuestion = 2;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -89,29 +96,54 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
         star.setMinimumWidth(starDrawable.getBitmap().getWidth());
         star.setMinimumHeight(starDrawable.getBitmap().getWidth());
 
-
-
-
         rotate = AnimationUtils.loadAnimation(MainActivity.this, R.anim.rotate);
 
         mRecordButton.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
+                //counter += 1 ;
+                Log.d(LOG_TAG, "onClick: counter = " + counter);
+                mStartRecording = !mStartRecording;
                 onRecord(mStartRecording);
                 if (mStartRecording) {
                     mRecordButton.setText("Stop recording");
+
+                    if (counter < maxQuestion) {
+                        mTextView.setText(String.format("question %d", counter));
+                        star.startAnimation(rotate);
+                    } else {
+                        //counter = 0;
+                    }
+                    counter++;
                 } else {
                     mRecordButton.setText("Start recording");
+                    mRecordButton.setEnabled(false);
+                    useHODClient();
                 }
-                mStartRecording = !mStartRecording;
+
+                switch (counter) {
+                    case 2 :
+                        mTextView.setText("question 2");
+                        break;
+                    case 3 :
+                        mTextView.setText("question 3");
+                        break;
+                    case 4 :
+                        mTextView.setText("question 4");
+                        break;
+                    case 5 :
+                        mTextView.setText("question 5");
+                        break;
+                    case 6 :
+                        mTextView.setText("done!");
+                        break;
+                }
+
             }
         });
-
         mHODbutton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                star.startAnimation(rotate);
                 useHODClient();
-
             }
         });
     }
@@ -130,7 +162,7 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
 
             Intent intent = new Intent(MainActivity.this,ResultActivity.class);
             intent.putExtra("ishappy",isHappy);
-            intent.putExtra("byteArray",byteArray);
+            intent.putExtra("byteArray", byteArray);
             startActivity(intent);
         }
     }
@@ -156,7 +188,7 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
         params.put("file", mFileName);
         hodClient.PostRequest(params, hodApp, HODClient.REQ_MODE.ASYNC);
     }
-
+    List<String> textArray = new ArrayList<>();
     // HOD methods.
     @Override
     public void requestCompletedWithContent(String response) {
@@ -164,33 +196,62 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
             SpeechRecognitionResponse resp = hodResponseParser.ParseSpeechRecognitionResponse(response);
             if (resp != null) {
                 for (SpeechRecognitionResponse.Document doc : resp.document) {
+                    mRecordButton.setEnabled(true);
                     String text = doc.content;
                     Log.d(LOG_TAG, "requestCompletedWithContent: " + text);
-                    hodApp = HODApps.ANALYZE_SENTIMENT;
-                    Map<String, Object> params = new HashMap<>();
-                    params.put("text", text);
-                    //params.put("lang", "en-US");
-                    hodClient.GetRequest(params, hodApp, HODClient.REQ_MODE.SYNC);
+                    if (text.length() == 0) {
+                        // please speak again.
+                    } else {
+                        async_counter += 1 ;
+                        textArray.add(text);
+                        if (counter > maxQuestion) {
+                            Log.d(LOG_TAG, "requestCompletedWithContent: " + text);
+                            hodApp = HODApps.ANALYZE_SENTIMENT;
+                            Map<String, Object> params = new HashMap<>();
+                            params.put("text", textArray);
+                            hodClient.GetRequest(params, hodApp, HODClient.REQ_MODE.SYNC);
+                        }
+                        //hodClient.GetRequest(params, hodApp, HODClient.REQ_MODE.SYNC);
+                    }
+/*
+mRecordButton.setEnabled(true);
+                    recognizedText = doc.content;
+
+                    Runnable runnable = new Runnable() {
+                        @Override
+                        public void run() {
+                            hodApp = HODApps.ANALYZE_SENTIMENT;
+                            Map<String, Object> params = new HashMap<>();
+                            params.put("text", recognizedText);
+                            hodClient.GetRequest(params, hodApp, HODClient.REQ_MODE.SYNC);
+                        }
+                    };
+                    Handler delay = new Handler();
+                    delay.postDelayed(runnable, 500);
+*/
+                    //hodClient.GetRequest(params, hodApp, HODClient.REQ_MODE.SYNC);
                 }
             }
         }
         else if (hodApp.equals(HODApps.ANALYZE_SENTIMENT)) {
             SentimentAnalysisResponse resp = hodResponseParser.ParseSentimentAnalysisResponse(response);
+            async_counter += 1 ;
+            mRecordButton.setEnabled(true);
+            star.clearAnimation();
             if (resp != null) {
                 double agg = resp.aggregate.score;
+                if (counter >= maxQuestion){
                     if (agg >= 0.0) {
                         isHappy = true;
                     } else if (agg < 0.0) {
                         isHappy = false;
                     }
-                Log.d(LOG_TAG, "requestCompletedWithContent: "+isHappy);
-
-                Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        fileUri = getOutputMediaFileUri(MEDIA_TYPE_IMAGE); // create a file to save the image
-//                intent.putExtra(MediaStore.EXTRA_OUTPUT, fileUri); // set the image file name
-                // start the image capture Intent
-                startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+                    Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+                    startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
+                }
+                Log.d(LOG_TAG, "requestCompletedWithContent: " + isHappy);
             }
+
         }
     }
 
@@ -203,6 +264,7 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
 
     @Override
     public void onErrorOccurred(String errorMessage) {
+        mRecordButton.setEnabled(true);
         Log.i(LOG_TAG, "onErrorOccurred: " + errorMessage);
     }
 
@@ -264,15 +326,6 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
     public MainActivity() {
         mFileName = Environment.getExternalStorageDirectory().getAbsolutePath();
         mFileName += "/audiorecord.mp4";
-    }
-
-    public void takePhoto(View view) {
-        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        File photo = new File(Environment.getExternalStorageDirectory(),  "Pic.jpg");
-        intent.putExtra(MediaStore.EXTRA_OUTPUT,
-                Uri.fromFile(photo));
-        imageUri = Uri.fromFile(photo);
-        startActivityForResult(intent, TAKE_PICTURE);
     }
 
 }

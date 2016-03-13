@@ -25,8 +25,7 @@ public class ResultActivity extends AppCompatActivity {
         characterView = (ImageView) findViewById(R.id.characterView);
 
         Intent recievedIntent = getIntent();
-        isHappy = false;
-//        isHappy = recievedIntent.getBooleanExtra("ishappy", true);
+        isHappy = recievedIntent.getBooleanExtra("ishappy", true);
         byte[] byteArray = recievedIntent.getByteArrayExtra("byteArray");
         Bitmap selfie = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 
