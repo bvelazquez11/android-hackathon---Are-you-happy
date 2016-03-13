@@ -11,14 +11,7 @@ public class SpeechRecognitionResponse {
     public class Document {
         public Integer offset;
         public String content;
-        public String getContent() {
-            return content;
-        }
         public Integer confidence;
         public Integer duration;
-    }
-
-    public List<Document> getDocument() {
-        return document;
     }
 }

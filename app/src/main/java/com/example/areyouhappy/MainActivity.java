@@ -18,12 +18,14 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Observer;
 
 import hod.api.hodclient.HODApps;
 import hod.api.hodclient.HODClient;
 import hod.api.hodclient.IHODClientCallback;
 import hod.response.parser.HODResponseParser;
 import hod.response.parser.RecognizeSpeechResponse;
+import hod.response.parser.SentimentAnalysisResponse;
 import hod.response.parser.SpeechRecognitionResponse;
 
 public class MainActivity extends AppCompatActivity implements IHODClientCallback {
@@ -44,7 +46,8 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
 
     boolean mStartPlaying = true;
     boolean mStartRecording = true;
-
+    String hodApp = "";
+    boolean isHappy;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -105,7 +108,7 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
 
     private void useHODClient() {
 
-        String hodApp = HODApps.RECOGNIZE_SPEECH;
+        hodApp = HODApps.RECOGNIZE_SPEECH;
         Map<String,Object> params =  new HashMap<String,Object>();
         params.put("file", mFileName);
         hodClient.PostRequest(params, hodApp, HODClient.REQ_MODE.ASYNC);
@@ -114,10 +117,31 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
     // HOD methods.
     @Override
     public void requestCompletedWithContent(String response) {
-        SpeechRecognitionResponse resp = hodResponseParser.ParseSpeechRecognitionResponse(response);
-        if(resp != null){
-            String text = resp.getDocument().get(0).getContent();
-            mTextView.setText(text);
+        if (hodApp.equals(HODApps.RECOGNIZE_SPEECH)) {
+            SpeechRecognitionResponse resp = hodResponseParser.ParseSpeechRecognitionResponse(response);
+            if (resp != null) {
+                for (SpeechRecognitionResponse.Document doc : resp.document) {
+                    String text = doc.content;
+                    Log.d(LOG_TAG, "requestCompletedWithContent: " + text);
+                    hodApp = HODApps.ANALYZE_SENTIMENT;
+                    Map<String, Object> params = new HashMap<>();
+                    params.put("text", text);
+                    //params.put("lang", "en-US");
+                    hodClient.GetRequest(params, hodApp, HODClient.REQ_MODE.SYNC);
+                }
+            }
+        }
+        else if (hodApp.equals(HODApps.ANALYZE_SENTIMENT)) {
+            SentimentAnalysisResponse resp = hodResponseParser.ParseSentimentAnalysisResponse(response);
+            if (resp != null) {
+                double agg = resp.aggregate.score;
+                    if (agg >= 0.0) {
+                        isHappy = true;
+                    } else if (agg < 0.0){
+                        isHappy = false;
+                    }
+                Log.d(LOG_TAG, "requestCompletedWithContent: "+isHappy);
+            }
         }
     }
 
@@ -125,12 +149,12 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
     public void requestCompletedWithJobID(String response) {
         String jobID = hodResponseParser.ParseJobID(response);
         if (jobID.length() > 0)
-            hodClient.GetJobStatus(jobID);
+            hodClient.GetJobResult(jobID);
     }
 
     @Override
     public void onErrorOccurred(String errorMessage) {
-
+        Log.i(LOG_TAG, "onErrorOccurred: " + errorMessage);
     }
 
     //Recorder methods
