@@ -227,6 +227,7 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
 
                     double percent = Math.abs(agg) * 100;
                     rounded = (int) Math.round(percent);
+                    Log.d(LOG_TAG, "requestCompletedWithContent: percent= " + rounded);
 
                     Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
                     startActivityForResult(intent, CAPTURE_IMAGE_ACTIVITY_REQUEST_CODE);
