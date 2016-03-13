@@ -122,10 +122,10 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
 
                 switch (counter) {
                     case 2 :
-                        mTextView.setText("question 2");
+                        mTextView.setText("How was your past week?");
                         break;
                     case 3 :
-                        mTextView.setText("question 3");
+                        mTextView.setText("Done!");
                         break;
                     case 4 :
                         mTextView.setText("question 4");
