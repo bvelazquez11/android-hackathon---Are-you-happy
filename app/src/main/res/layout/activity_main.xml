@@ -33,11 +33,11 @@
 
     <TextView
         android:id="@+id/textView"
-        android:text="Hey! How you doing dude?"
+        android:text="How's your day?"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:textStyle="bold"
         android:textSize="20dp"
-        android:textColor="#fffd6b"
+        android:textColor="@color/colorAccent"
         android:gravity="center_horizontal"/>
 </FrameLayout>

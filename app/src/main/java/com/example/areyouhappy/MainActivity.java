@@ -73,7 +73,7 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
     boolean mStartRecording = false;
     String hodApp = "";
     boolean isHappy;
-    int maxQuestion = 5;
+    int maxQuestion = 1;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -106,23 +106,23 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
                 onRecord(mStartRecording);
                 if (mStartRecording) {
                     mRecordButton.setText("Stop recording");
-
+                    star.startAnimation(rotate);
                     if (counter < maxQuestion) {
-                        mTextView.setText(String.format("question %d", counter));
-                        star.startAnimation(rotate);
+
                     } else {
                         //counter = 0;
                     }
-                    counter++;
                 } else {
                     mRecordButton.setText("Start recording");
                     mRecordButton.setEnabled(false);
+                    counter++;
                     useHODClient();
                 }
 
                 switch (counter) {
                     case 2 :
-                        mTextView.setText("If your past week were a season like summer or winter, what would it be and why?");
+                        mTextView.setText("Done!");
+//                        mTextView.setText("If your past week were a season like summer or winter, what would it be and why?");
                         break;
                     case 3 :
                         mTextView.setText("Are you lucky? Why or why not?");
@@ -215,7 +215,6 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
             SentimentAnalysisResponse resp = hodResponseParser.ParseSentimentAnalysisResponse(response);
             async_counter += 1 ;
             mRecordButton.setEnabled(true);
-            star.clearAnimation();
             if (resp != null) {
                 double agg = resp.aggregate.score;
                 if (counter >= maxQuestion){
@@ -236,6 +235,7 @@ public class MainActivity extends AppCompatActivity implements IHODClientCallbac
             }
 
         }
+        star.clearAnimation();
     }
 
     @Override
